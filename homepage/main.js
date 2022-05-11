@@ -77,16 +77,27 @@ function openFeedback() {
 function checkForTranslation() {
     var input = document.getElementById("inputText").value;
     var output = document.getElementById("outputText");
+    var fromLanguage = document.getElementById("fromLanguage").innerHTML;
 
-    input = input.toLowerCase();
+    let url = "https://49147.gradio.app/api/predict/";
 
-    if (input == "good morning") {
-        output.innerHTML = "magandang umaga";
+    fromLanguage = fromLanguage.toLowerCase();
+
+    
+    if (fromLanguage == "filipino") {
+        console.log(fromLanguage);
+        fetch('url', { method: "POST", body: JSON.stringify({"data":[ "English-to-Filipino",  input]})
+            , headers: { "Content-Type": "application/json" } }).then(function(response)
+            { return response.json(); }).then(function(json_response){ output.innerHTML = JSON.stringify(data) });
     }
 
+    else if (fromLanguage == "english") {
+        console.log(fromLanguage);
+        fetch('url', { method: "POST", body: JSON.stringify({"data":[ "Filipino-to-English",  input]})
+            , headers: { "Content-Type": "application/json" } }).then(function(response)
+            { return response.json(); }).then(function(json_response){ output.innerHTML = JSON.stringify(data) });
+    }
 
-    // IMPORTANT / do not erase / or you can change format but basically we should be able to erase content
-    // erases output when input is erased
     else {
         output.innerHTML = "";
     }
