@@ -1,4 +1,4 @@
-// SWAP LANGUAGE --------------------------------------------------------
+// SWAP LANGUAGES --------------------------------------------------------
 //     to access languages, __Language.innerHTML (from or to)
 function swapLanguages() {
     var fromLanguage = document.getElementById("fromLanguage");
@@ -8,7 +8,8 @@ function swapLanguages() {
 
     fromLanguage.innerHTML = toLanguage.innerHTML;
     toLanguage.innerHTML = holder;
-    
+
+    checkForTranslation();
 }
 
 
@@ -16,6 +17,8 @@ function swapLanguages() {
 function clearInput() {
     document.getElementById("inputText").value = "";
     document.getElementById("outputText").innerHTML = "";
+
+    characterCount()
 }
 
 
@@ -27,6 +30,7 @@ function copyOutput() {
 
 
 // TEXT TO SPEECH -------------------------------------------------------
+//      uses Web Speech API, specifically the speechSynthesis interface
 var text = document.getElementById("outputText");
 var language = document.getElementById("toLanguage");
 
@@ -52,16 +56,27 @@ function textToSpeech() {
 
 
 // SPEECH TO TEXT -------------------------------------------------------
+//      uses Web Speech API, specifically the speechRecognition interface
 var textarea = document.getElementById('inputText');
 var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 var recognition = new SpeechRecognition();
 
 function speechToText() {
+    
     recognition.start();
+    
+    recognition.onstart = function (e) {
+        document.getElementById("mic-status-icon").src= "images/speaking-icon.png";
+    }
+
+    recognition.onsoundend = function () {
+        recognition.stop();
+    }
 
     recognition.onresult = function (e) {
         var transcript = e.results[0][0].transcript;
         inputText.value = transcript;
+        document.getElementById("mic-status-icon").src= "images/not-speaking-icon.png";
         checkForTranslation();
     }
 }
@@ -69,33 +84,48 @@ function speechToText() {
 
 // OPEN FEEDBACK --------------------------------------------------------
 function openFeedback() {
-    window.open('https://www.tinyurl.com/SalamaThanksFeedbackForm1', '_blank').focus();
+    window.open('https://www.tinyurl.com/SalamaThanksFeedbackForm3', '_blank').focus();
 }
 
 
-// INPUT TO OUTPUT ------------------------------------------------------               ONLY FUNCTION YOU CAN EDIT (can add more but you dont need to touch the ones on top)
+// CONTACT INFO ---------------------------------------------------------
+function contactInfo() {
+    window.open('mailto:kate.mariene.baldonado@eee.upd.edu.ph?cc=peter.john.flores@eee.upd.edu.ph&cc=emilio.leion.tamayo@eee.upd.edu.ph&cc=eliezer.jasper.de.gucena@eee.upd.edu.ph&subject=SalamaThanks%20Website%20Contact');
+}
+
+
+// CHARACTER COUNT ------------------------------------------------------
+function characterCount() {
+    var input = document.getElementById("inputText").value;
+    var signalNum = document.querySelector(".signal-number");
+    
+    let valLength = input.length;
+    signalNum.innerHTML = valLength;
+}
+
+
+
+// INPUT TO OUTPUT ------------------------------------------------------
 function checkForTranslation() {
     var input = document.getElementById("inputText").value;
     var output = document.getElementById("outputText");
     var fromLanguage = document.getElementById("fromLanguage").innerHTML;
 
-    let url = "https://49147.gradio.app/api/predict/";
-
     fromLanguage = fromLanguage.toLowerCase();
 
-    
-    if (fromLanguage == "filipino") {
-        console.log(fromLanguage);
-        fetch('url', { method: "POST", body: JSON.stringify({"data":[ "English-to-Filipino",  input]})
-            , headers: { "Content-Type": "application/json" } }).then(function(response)
-            { return response.json(); }).then(function(json_response){ output.innerHTML = JSON.stringify(data) });
+    // API INPUT HERE 
+    if (fromLanguage == "english") {
+        fetch('https://hf.space/embed/SalamaThanks/SalamaThanksV3/+/api/predict/', { method: "POST", body: JSON.stringify({"data":[ "English-to-Filipino",  input]})
+            , headers: { "Content-Type": "application/json" } })
+            .then(response => response.json())
+            .then(data => { output.innerHTML = data.data;})
     }
 
-    else if (fromLanguage == "english") {
-        console.log(fromLanguage);
-        fetch('url', { method: "POST", body: JSON.stringify({"data":[ "Filipino-to-English",  input]})
-            , headers: { "Content-Type": "application/json" } }).then(function(response)
-            { return response.json(); }).then(function(json_response){ output.innerHTML = JSON.stringify(data) });
+    else if (fromLanguage == "filipino") {
+        fetch('https://hf.space/embed/SalamaThanks/SalamaThanksV3/+/api/predict/', { method: "POST", body: JSON.stringify({"data":[ "Filipino-to-English",  input]})
+            , headers: { "Content-Type": "application/json" } })
+            .then(response => response.json())
+            .then(data => { output.innerHTML = data.data;})
     }
 
     else {
